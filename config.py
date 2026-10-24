@@ -1,1 +1,6 @@
-ELEVENLABS_API_KEY = "sk_ed5194e19b319c6dee9a658c6cb4b93966ce59251b01974a"
+"""Local narration configuration; credentials are never stored in source."""
+import os
+
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "").strip()
+if not ELEVENLABS_API_KEY:
+    raise RuntimeError("Set ELEVENLABS_API_KEY in your local environment before starting narration.")
