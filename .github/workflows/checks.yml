@@ -1,0 +1,36 @@
+name: Offline Python checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.12'
+      - name: Parse Python source without importing providers
+        shell: python
+        run: |
+          import ast
+          from pathlib import Path
+
+          sources = [*Path('.').glob('*.py'), *Path('tests').glob('test_*.py')]
+          for source in sorted(sources):
+              ast.parse(source.read_text(encoding='utf-8'), filename=str(source))
+          print(f'Parsed {len(sources)} Python files without importing provider SDKs.')
+      - name: Test environment-only narration configuration
+        run: python -m unittest discover -s tests -v
